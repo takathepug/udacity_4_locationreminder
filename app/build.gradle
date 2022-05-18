@@ -31,10 +31,6 @@ android {
         returnDefaultValues = true
     }
 
-    //dataBinding {
-    //    enabled = true
-    //    enabledForTests = true
-    //}
     buildFeatures {
         dataBinding true
     }
@@ -47,8 +43,12 @@ dependencies {
     implementation "androidx.legacy:legacy-support-v4:$androidXLegacySupport"
     implementation "androidx.annotation:annotation:$androidXAnnotations"
 
-    implementation "androidx.cardview:cardview:$cardVersion"
+    implementation 'com.firebaseui:firebase-ui-auth:6.4.0'
+    implementation "com.google.firebase:firebase-auth:$firebaseAuthVersion"
+
     implementation "com.google.android.material:material:$materialVersion"
+
+    implementation "androidx.cardview:cardview:$cardVersion"
     implementation "androidx.recyclerview:recyclerview:$recyclerViewVersion"
     implementation "androidx.constraintlayout:constraintlayout:$constraintVersion"
 

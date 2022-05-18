@@ -33,7 +33,7 @@ task clean(type: Delete) {
 ext {
     // Sdk and tools
     // Support library and architecture components support minSdk 14 and above.
-    minSdkVersion = 16
+    minSdkVersion = 21
     targetSdkVersion = 30
     compileSdkVersion = 30
 
@@ -44,6 +44,7 @@ ext {
     appCompatVersion = '1.2.0'
     archLifecycleVersion = '2.2.0'
     cardVersion = '1.0.0'
+    firebaseAuthVersion='20.0.2'
     materialVersion = '1.1.0'
     fragmentVersion = '1.1.0-alpha07'
     recyclerViewVersion = '1.1.0'
