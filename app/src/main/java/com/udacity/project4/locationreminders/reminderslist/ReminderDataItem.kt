@@ -14,3 +14,7 @@ data class ReminderDataItem(
     var longitude: Double?,
     val id: String = UUID.randomUUID().toString()
 ) : Serializable
+
+fun ReminderDataItem.validateLatLon(): Boolean {
+    return latitude != null && longitude != null
+}

@@ -30,6 +30,7 @@
     <string name="select_title">Please select title</string>
     <string name="select_location">Please select location</string>
     <string name="geofences_not_added">Problem in adding geofences.</string>
+    <string name="geofences_added">Geofences added.</string>
     <string name="welcome">Welcome</string>
     <string name="err_enter_title">Please enter title</string>
     <string name="err_select_location">Please select location</string>
@@ -41,4 +42,5 @@
     <string name="geofence_too_many_pending_intents">You have provided too many PendingIntents to the addGeofences() call.</string>
     <string name="error_adding_geofence">Error Happened, Can\'t Add Geofence</string>
     <string name="error_log_in">Sign in unsuccessful</string>
+    <string name="error_location_permission_not_added">Location permission required</string>
 </resources>

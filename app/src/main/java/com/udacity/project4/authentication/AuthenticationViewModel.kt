@@ -17,26 +17,4 @@ class AuthenticationViewModel(): ViewModel() {
         }
     }
 
-
-
-
-
-/*
-    private val _user = MutableLiveData<FirebaseUser>()
-    private val _lastSigned = MutableLiveData<GoogleSignInAccount>()
-
-    val user: LiveData<FirebaseUser>
-        get() = _user
-
-    init {
-        _user.value = firebaseAuth.currentUser
-        getLastSigned()
-    }
-
-    private fun getLastSigned() {
-        val account = GoogleSignIn.getLastSignedInAccount(app.applicationContext)
-        _lastSigned.value = account
-    }
-
- */
 }

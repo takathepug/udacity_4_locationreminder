@@ -2,38 +2,38 @@ package com.udacity.project4.locationreminders.savereminder.selectreminderlocati
 
 
 import android.Manifest
-import android.app.Activity
-import android.content.Intent
-import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.content.res.Resources
+import android.location.Location
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.*
-import androidx.core.content.ContextCompat
+import androidx.annotation.RequiresApi
+import androidx.core.app.ActivityCompat
 import androidx.databinding.DataBindingUtil
-import com.google.android.gms.common.api.ApiException
-import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
-import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
-import com.google.android.material.snackbar.Snackbar
 import com.udacity.project4.R
 import com.udacity.project4.base.BaseFragment
-import com.udacity.project4.base.NavigationCommand
 import com.udacity.project4.databinding.FragmentSelectLocationBinding
 import com.udacity.project4.locationreminders.savereminder.SaveReminderViewModel
 import com.udacity.project4.utils.setDisplayHomeAsUpEnabled
 import org.koin.android.ext.android.inject
 
-class SelectLocationFragment : BaseFragment() {
+class SelectLocationFragment : OnMapReadyCallback, BaseFragment() {
+    private val TAG: String = javaClass.simpleName
 
     //Use Koin to get the view model of the SaveReminder
     override val _viewModel: SaveReminderViewModel by inject()
     private lateinit var binding: FragmentSelectLocationBinding
+
+    private lateinit var googleMap: GoogleMap
+    private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -47,8 +47,16 @@ class SelectLocationFragment : BaseFragment() {
         setHasOptionsMenu(true)
         setDisplayHomeAsUpEnabled(true)
 
-//        TODO: add the map setup implementation
-//        TODO: zoom to the user location after taking his permission
+        fusedLocationProviderClient =
+            LocationServices.getFusedLocationProviderClient(requireActivity())
+
+        // add the map setup implementation
+        val mapFragment = childFragmentManager.findFragmentById(R.id.mapView) as SupportMapFragment
+        mapFragment.getMapAsync(this)
+
+        // taking permissions
+
+//        TODO: zoom to the user location
 //        TODO: add style to the map
 //        TODO: put a marker to location that the user selected
 
@@ -87,5 +95,45 @@ class SelectLocationFragment : BaseFragment() {
         else -> super.onOptionsItemSelected(item)
     }
 
+    @RequiresApi(Build.VERSION_CODES.Q)
+    override fun onMapReady(p0: GoogleMap?) {
+        p0?.let {
+            googleMap = p0
+            checkPermissions()
+            mapStyle()
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.Q)
+    private fun checkPermissions() {
+        val isAccessFineLocGranted =
+            PackageManager.PERMISSION_GRANTED ==
+                ActivityCompat.checkSelfPermission(
+                    requireContext(), Manifest.permission.ACCESS_FINE_LOCATION)
+
+        Log.d(TAG, "ACCESS_FINE_LOCATION granted: $isAccessFineLocGranted")
+    }
+
+    private fun mapStyle() {
+        try {
+            val loadedMap = googleMap.setMapStyle(
+                MapStyleOptions.loadRawResourceStyle(
+                    requireActivity(),
+                    R.raw.map_style
+                )
+            )
+
+            Log.i(
+                "TEST",
+                "SelectLocationFragment.mapStyle: $loadedMap"
+            )
+
+        } catch (e: Resources.NotFoundException) {
+            Log.e(
+                "TEST",
+                "SelectLocationFragment.mapStyle ${e.message}"
+            )
+        }
+    }
 
 }
