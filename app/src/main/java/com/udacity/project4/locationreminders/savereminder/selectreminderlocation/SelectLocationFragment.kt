@@ -2,9 +2,9 @@ package com.udacity.project4.locationreminders.savereminder.selectreminderlocati
 
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Resources
-import android.location.Location
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -17,6 +17,7 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
+import com.google.android.material.snackbar.Snackbar
 import com.udacity.project4.R
 import com.udacity.project4.base.BaseFragment
 import com.udacity.project4.databinding.FragmentSelectLocationBinding
@@ -26,6 +27,8 @@ import org.koin.android.ext.android.inject
 
 class SelectLocationFragment : OnMapReadyCallback, BaseFragment() {
     private val TAG: String = javaClass.simpleName
+
+    private val PERMISSIONS_REQUEST_CODE = 4321
 
     //Use Koin to get the view model of the SaveReminder
     override val _viewModel: SaveReminderViewModel by inject()
@@ -106,12 +109,58 @@ class SelectLocationFragment : OnMapReadyCallback, BaseFragment() {
 
     @RequiresApi(Build.VERSION_CODES.Q)
     private fun checkPermissions() {
+        // will contain missing permission that will be requested
+        val permissionsToRequest : MutableList<String> = mutableListOf()
+
         val isAccessFineLocGranted =
             PackageManager.PERMISSION_GRANTED ==
                 ActivityCompat.checkSelfPermission(
                     requireContext(), Manifest.permission.ACCESS_FINE_LOCATION)
 
+        if (!isAccessFineLocGranted)
+            permissionsToRequest.add(Manifest.permission.ACCESS_FINE_LOCATION)
+
+        val isBackgroundLocGranted =
+            PackageManager.PERMISSION_GRANTED ==
+                    ActivityCompat.checkSelfPermission(
+                    requireContext(), Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+
+        if (!isBackgroundLocGranted)
+            permissionsToRequest.add(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+
         Log.d(TAG, "ACCESS_FINE_LOCATION granted: $isAccessFineLocGranted")
+        Log.d(TAG, "ACCESS_BACKGROUND_LOCATION granted: $isBackgroundLocGranted")
+
+        if (permissionsToRequest.isNotEmpty())
+            requestPermissions(permissionsToRequest)
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        if (requestCode ==  PERMISSIONS_REQUEST_CODE
+        ) {
+            Snackbar.make(
+                binding.constraintLayout,
+                R.string.permission_denied_explanation,
+                Snackbar.LENGTH_LONG
+            )
+            .show()
+        } else {
+            Log.e(TAG,"Request code: $PERMISSIONS_REQUEST_CODE")
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.Q)
+    private fun requestPermissions(permissionsToRequest: MutableList<String>) {
+
+        ActivityCompat.requestPermissions(
+            requireActivity(),
+            permissionsToRequest.toTypedArray(),
+            PERMISSIONS_REQUEST_CODE
+        )
     }
 
     private fun mapStyle() {
