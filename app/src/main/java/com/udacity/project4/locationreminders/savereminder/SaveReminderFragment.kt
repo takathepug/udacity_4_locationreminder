@@ -85,16 +85,13 @@ class SaveReminderFragment : BaseFragment() {
                 location = location
             )
 
-            // save reminder
+            // use the user entered reminder details to:
+            // 1) add a geofencing request
+            // 2) save the reminder to the local db
             if (_viewModel.validateAndSaveReminder(newReminder))
-            // TODO remove
                 addGeofence(newReminder)
             else
                 Log.w(TAG, "Error saving new reminder data")
-
-//            TODO: use the user entered reminder details to:
-//             1) add a geofencing request
-//             2) save the reminder to the local db
         }
     }
 
