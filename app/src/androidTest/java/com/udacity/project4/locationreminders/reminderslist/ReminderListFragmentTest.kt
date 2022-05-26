@@ -4,8 +4,11 @@ import android.os.Bundle
 import com.udacity.project4.R
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.fragment.app.testing.launchFragmentInContainer
+import androidx.navigation.NavController
+import androidx.navigation.Navigation
 import androidx.test.core.app.ApplicationProvider.getApplicationContext
 import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -15,6 +18,7 @@ import com.udacity.project4.locationreminders.data.local.RemindersLocalRepositor
 import com.udacity.project4.locationreminders.data.local.LocalDB
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
+import com.udacity.project4.ReminderTestUtils.Companion.generateReminderDTO
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Rule
@@ -27,9 +31,13 @@ import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 import androidx.test.espresso.matcher.ViewMatchers.*
+import com.udacity.project4.locationreminders.data.dto.ReminderDTO
 import kotlinx.coroutines.test.runBlockingTest
+import org.hamcrest.CoreMatchers.not
+import org.mockito.Mockito.mock
 import org.koin.core.context.GlobalContext
 import org.koin.test.get
+import org.mockito.Mockito.verify
 
 @RunWith(AndroidJUnit4::class)
 @ExperimentalCoroutinesApi
@@ -79,7 +87,46 @@ class ReminderListFragmentTest {
         onView(withId(R.id.noDataTextView)).check(matches(isDisplayed()))
     }
 
-//    TODO: test the navigation of the fragments.
-//    TODO: test the displayed data on the UI.
-//    TODO: add testing for the error messages.
+    @Test
+    fun remindersShown() = runBlockingTest {
+
+        val newReminder1: ReminderDTO = generateReminderDTO()
+        val newReminder2: ReminderDTO = generateReminderDTO()
+
+        runBlocking {
+            repository.saveReminder(newReminder1)
+            repository.saveReminder(newReminder2)
+        }
+
+        launchFragmentInContainer<ReminderListFragment>(Bundle(), R.style.AppTheme)
+
+        // the "no data" text shouldn't be displayed
+        onView(withId(R.id.noDataTextView)).check(matches(not(isDisplayed())))
+
+        // check first reminder
+        onView(withText(newReminder1.title)).check(matches(isDisplayed()))
+        onView(withText(newReminder1.description)).check(matches(isDisplayed()))
+        onView(withText(newReminder1.location)).check(matches(isDisplayed()))
+
+        // check second reminder
+        onView(withText(newReminder2.title)).check(matches(isDisplayed()))
+        onView(withText(newReminder2.description)).check(matches(isDisplayed()))
+        onView(withText(newReminder2.location)).check(matches(isDisplayed()))
+    }
+
+    @Test
+    fun clickOnFabIcon_navigatesTo_saveReminderFragment() {
+        val scenario =
+            launchFragmentInContainer<ReminderListFragment>(Bundle(), R.style.AppTheme)
+        val navController = mock(NavController::class.java)
+
+        scenario.onFragment {
+            Navigation.setViewNavController(it.view!!, navController)
+        }
+
+        onView(withId(R.id.addReminderFAB)).perform(click())
+
+        verify(navController).navigate(ReminderListFragmentDirections.toSaveReminder())
+    }
+
 }
