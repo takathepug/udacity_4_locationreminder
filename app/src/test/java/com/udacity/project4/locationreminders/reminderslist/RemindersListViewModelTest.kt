@@ -49,7 +49,7 @@ class RemindersListViewModelTest {
     @Test
     fun loadRemindersOnErrorShowsSnackBar() = runBlockingTest {
 
-        datasource.returnError = true
+        datasource.shouldReturnError = true
         remindersListViewModel.loadReminders()
         assertThat(remindersListViewModel.showSnackBar.getOrAwaitValue(), `is`(FakeDataSource.ERROR_MSG))
 
