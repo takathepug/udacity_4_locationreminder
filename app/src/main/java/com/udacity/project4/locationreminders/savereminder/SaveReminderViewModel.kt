@@ -16,10 +16,7 @@ class SaveReminderViewModel(val app: Application, private val dataSource: Remind
     BaseViewModel(app) {
     val reminderTitle = MutableLiveData<String>()
     val reminderDescription = MutableLiveData<String>()
-    val reminderSelectedLocationStr = MutableLiveData<String>()
     val selectedPOI = MutableLiveData<PointOfInterest>()
-    val latitude = MutableLiveData<Double>()
-    val longitude = MutableLiveData<Double>()
 
     /**
      * Clear the live data objects to start fresh next time the view model gets called
@@ -27,10 +24,7 @@ class SaveReminderViewModel(val app: Application, private val dataSource: Remind
     fun onClear() {
         reminderTitle.value = null
         reminderDescription.value = null
-        reminderSelectedLocationStr.value = null
         selectedPOI.value = null
-        latitude.value = null
-        longitude.value = null
     }
 
     /**
@@ -43,6 +37,22 @@ class SaveReminderViewModel(val app: Application, private val dataSource: Remind
                 } else {
                     false
                 }
+    }
+
+    /**
+     * Validate the entered data and show error to the user if there's any invalid data
+     */
+    fun validateEnteredData(reminderData: ReminderDataItem): Boolean {
+        if (reminderData.title.isNullOrEmpty()) {
+            showSnackBarInt.value = R.string.err_enter_title
+            return false
+        }
+
+        if (reminderData.location.isNullOrEmpty()) {
+            showSnackBarInt.value = R.string.err_select_location
+            return false
+        }
+        return true
     }
 
     /**
@@ -65,21 +75,5 @@ class SaveReminderViewModel(val app: Application, private val dataSource: Remind
             showToast.value = app.getString(R.string.reminder_saved)
             navigationCommand.value = NavigationCommand.Back
         }
-    }
-
-    /**
-     * Validate the entered data and show error to the user if there's any invalid data
-     */
-    fun validateEnteredData(reminderData: ReminderDataItem): Boolean {
-        if (reminderData.title.isNullOrEmpty()) {
-            showSnackBarInt.value = R.string.err_enter_title
-            return false
-        }
-
-        if (reminderData.location.isNullOrEmpty()) {
-            showSnackBarInt.value = R.string.err_select_location
-            return false
-        }
-        return true
     }
 }

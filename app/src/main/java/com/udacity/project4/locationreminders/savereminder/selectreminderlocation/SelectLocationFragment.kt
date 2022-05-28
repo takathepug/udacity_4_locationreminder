@@ -8,6 +8,7 @@ import android.content.Intent
 import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.content.res.Resources
+import android.location.Geocoder
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -33,6 +34,7 @@ import com.udacity.project4.databinding.FragmentSelectLocationBinding
 import com.udacity.project4.locationreminders.savereminder.SaveReminderViewModel
 import com.udacity.project4.utils.setDisplayHomeAsUpEnabled
 import org.koin.android.ext.android.inject
+import java.util.*
 
 private const val LOCATION_PERMISSION_INDEX = 0
 private const val BACKGROUND_LOCATION_PERMISSION_INDEX = 1
@@ -86,10 +88,7 @@ class SelectLocationFragment : OnMapReadyCallback, BaseFragment() {
         // When the user confirms on the selected location, send back the selected location
         // details to the view model and navigate back to the previous fragment to save the
         // reminder and add the geofence
-        val latLng = poi.latLng
-        _viewModel.reminderSelectedLocationStr.value = poi.name
-        _viewModel.latitude.value = latLng.latitude
-        _viewModel.longitude.value = latLng.longitude
+        _viewModel.selectedPOI.value = poi
         findNavController().popBackStack()
     }
 
@@ -249,18 +248,22 @@ class SelectLocationFragment : OnMapReadyCallback, BaseFragment() {
     private fun addMapClickListener(map: GoogleMap) {
         map.setOnMapClickListener { latLng ->
             binding.buttonSave.visibility = View.VISIBLE
+
+            val geocoder = Geocoder(requireContext(), Locale.getDefault())
+            val addresses = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1)
+
+            val poi = PointOfInterest(latLng, null, addresses[0].getAddressLine(0))
+
             binding.buttonSave.setOnClickListener {
-                _viewModel.latitude.value = latLng.latitude
-                _viewModel.longitude.value = latLng.longitude
-                _viewModel.reminderSelectedLocationStr.value = getString(R.string.custom_location_used)
+                _viewModel.selectedPOI.value = poi
                 findNavController().popBackStack()
             }
 
             // move center of screen and zoom in
-            val cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 12f)
+            val cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 18f)
             map.moveCamera(cameraUpdate)
 
-            val poiMarker = map.addMarker(MarkerOptions().position(latLng))
+            val poiMarker = map.addMarker(MarkerOptions().position(latLng).title(poi.name))
             poiMarker.showInfoWindow()
         }
     }
