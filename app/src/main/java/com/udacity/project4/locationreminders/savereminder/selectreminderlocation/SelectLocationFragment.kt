@@ -257,7 +257,7 @@ class SelectLocationFragment : OnMapReadyCallback, BaseFragment() {
             }
 
             // move center of screen and zoom in
-            val cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 12f)
+            val cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 18f)
             map.moveCamera(cameraUpdate)
 
             val poiMarker = map.addMarker(MarkerOptions().position(latLng))
