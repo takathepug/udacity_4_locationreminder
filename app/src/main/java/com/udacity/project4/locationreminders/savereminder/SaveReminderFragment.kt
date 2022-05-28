@@ -65,7 +65,7 @@ class SaveReminderFragment : BaseFragment() {
 
         binding.lifecycleOwner = this
         binding.selectLocation.setOnClickListener {
-            //            Navigate to another fragment to get the user location
+            // Navigate to another fragment to get the user location
             _viewModel.navigationCommand.value =
                 NavigationCommand.To(SaveReminderFragmentDirections.actionSaveReminderFragmentToSelectLocationFragment())
         }
@@ -73,9 +73,10 @@ class SaveReminderFragment : BaseFragment() {
         binding.saveReminder.setOnClickListener {
             val title = _viewModel.reminderTitle.value
             val description = _viewModel.reminderDescription.value
-            val location = _viewModel.reminderSelectedLocationStr.value
-            val latitude = _viewModel.latitude.value
-            val longitude = _viewModel.longitude.value
+            val selectedPoi = _viewModel.selectedPOI.value
+            val location = selectedPoi?.name
+            val latitude = selectedPoi?.latLng?.latitude
+            val longitude = selectedPoi?.latLng?.longitude
 
             val newReminder = ReminderDataItem(
                 title = title,

@@ -70,7 +70,7 @@ class ReminderListFragment : BaseFragment() {
         val adapter = RemindersListAdapter {
         }
 
-//        setup the recycler view using the extension function
+        // setup the recycler view using the extension function
         binding.reminderssRecyclerView.setup(adapter)
     }
 
@@ -86,8 +86,8 @@ class ReminderListFragment : BaseFragment() {
                 }
             }
         }
-        return super.onOptionsItemSelected(item)
 
+        return super.onOptionsItemSelected(item)
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {

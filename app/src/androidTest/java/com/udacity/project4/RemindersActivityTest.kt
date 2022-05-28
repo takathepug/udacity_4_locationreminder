@@ -122,12 +122,12 @@ class RemindersActivityTest :
         Espresso.onView(withId(R.id.button_save)).perform(ViewActions.click())
 
         // validate new reminder
-        val selectedLocation = saveReminderViewModel.reminderSelectedLocationStr.value
+        //val selectedLocation = saveReminderViewModel.reminderSelectedLocationStr.value
+        val selectedLocation = saveReminderViewModel.selectedPOI.value?.name
+
         Espresso.onView(ViewMatchers.withText(title)).check(matches(isDisplayed()))
         Espresso.onView(ViewMatchers.withText(desc)).check(matches(isDisplayed()))
-        Espresso.onView(ViewMatchers.withText(selectedLocation)).check(
-            matches(isDisplayed())
-        )
+        Espresso.onView(ViewMatchers.withText(selectedLocation)).check(matches(isDisplayed()))
 
         activityScenario.close()
     }
