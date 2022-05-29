@@ -46,9 +46,10 @@ class SaveReminderFragment : BaseFragment() {
     override val _viewModel: SaveReminderViewModel by inject()
     private lateinit var binding: FragmentSaveReminderBinding
 
+    private lateinit var geofencingClient: GeofencingClient
     private val geofencePendingIntent: PendingIntent by lazy {
         val intent =
-            Intent(requireActivity().applicationContext, GeofenceBroadcastReceiver::class.java)
+            Intent(requireContext(), GeofenceBroadcastReceiver::class.java)
         intent.action = ACTION_GEOFENCE_EVENT
         PendingIntent.getBroadcast(
             requireActivity(), 0, intent,
@@ -66,6 +67,8 @@ class SaveReminderFragment : BaseFragment() {
         setDisplayHomeAsUpEnabled(true)
 
         binding.viewModel = _viewModel
+
+        geofencingClient = LocationServices.getGeofencingClient(requireActivity())
 
         return binding.root
     }
@@ -149,11 +152,6 @@ class SaveReminderFragment : BaseFragment() {
 
             // create request
             val geofencingRequest = buildGeoFencingRequest(geoFence)
-
-            // get client
-            val geofencingClient: GeofencingClient = LocationServices.getGeofencingClient(
-                requireActivity()
-            )
 
             geofencingClient.addGeofences(geofencingRequest, geofencePendingIntent)?.run {
                 addOnSuccessListener {
