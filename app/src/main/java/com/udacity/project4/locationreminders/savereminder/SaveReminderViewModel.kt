@@ -76,4 +76,12 @@ class SaveReminderViewModel(val app: Application, private val dataSource: Remind
             navigationCommand.value = NavigationCommand.Back
         }
     }
+
+    fun onGeofenceAdded() {
+        showSnackBarInt.value = R.string.geofences_added
+    }
+
+    fun onGeofenceAddedError() {
+        showSnackBarInt.value = R.string.error_adding_geofence
+    }
 }
