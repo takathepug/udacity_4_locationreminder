@@ -1,17 +1,19 @@
 package com.udacity.project4
 
 import android.app.Application
+import android.view.View
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider.getApplicationContext
-import androidx.test.espresso.Espresso
+import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.IdlingRegistry
 import androidx.test.espresso.action.ViewActions
 import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.matcher.ViewMatchers
-import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
-import androidx.test.espresso.matcher.ViewMatchers.withId
+import androidx.test.espresso.matcher.RootMatchers.withDecorView
+import androidx.test.espresso.matcher.ViewMatchers.*
+import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
+import com.google.android.material.internal.ContextUtils
 import com.udacity.project4.locationreminders.RemindersActivity
 import com.udacity.project4.locationreminders.data.ReminderDataSource
 import com.udacity.project4.locationreminders.data.local.LocalDB
@@ -20,9 +22,13 @@ import com.udacity.project4.locationreminders.reminderslist.RemindersListViewMod
 import com.udacity.project4.locationreminders.savereminder.SaveReminderViewModel
 import com.udacity.project4.util.DataBindingIdlingResource
 import com.udacity.project4.util.monitorActivity
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import org.hamcrest.Matchers.not
+import org.hamcrest.core.Is.`is`
 import org.junit.After
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.koin.androidx.viewmodel.dsl.viewModel
@@ -31,7 +37,7 @@ import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 import org.koin.test.AutoCloseKoinTest
 import org.koin.test.get
-import kotlinx.coroutines.delay
+
 
 @RunWith(AndroidJUnit4::class)
 @LargeTest
@@ -43,6 +49,10 @@ class RemindersActivityTest :
     private lateinit var appContext: Application
     private lateinit var saveReminderViewModel: SaveReminderViewModel
     private val dataBindingIdlingResource = DataBindingIdlingResource()
+
+    @get:Rule
+    var activityScenarioRule = ActivityScenarioRule(RemindersActivity::class.java)
+    private lateinit var decorView: View
 
     /**
      * As we use Koin as a Service Locator Library to develop our code, we'll also use Koin to test our code.
@@ -80,6 +90,10 @@ class RemindersActivityTest :
         runBlocking {
             repository.deleteAllReminders()
         }
+
+        activityScenarioRule.scenario.onActivity { activity ->
+            decorView = activity.window.decorView
+        }
     }
 
     @Before
@@ -96,38 +110,44 @@ class RemindersActivityTest :
     fun addReminder() = runBlocking {
         val activityScenario = ActivityScenario.launch(RemindersActivity::class.java)
 
-        dataBindingIdlingResource.monitorActivity(activityScenario)
+            dataBindingIdlingResource.monitorActivity(activityScenario)
 
-        // no data at start
-        Espresso.onView(withId(R.id.noDataTextView)).check(matches(isDisplayed()))
+            // no data at start
+            onView(withId(R.id.noDataTextView)).check(matches(isDisplayed()))
 
-        // click on add reminder
-        Espresso.onView(withId(R.id.addReminderFAB)).perform(ViewActions.click())
+            // click on add reminder
+            onView(withId(R.id.addReminderFAB)).perform(ViewActions.click())
 
-        // fill in new reminder fields
-        val title = "Title 345"
-        val desc = "Desc 345"
-        Espresso.onView(withId(R.id.reminderTitle)).perform(ViewActions.replaceText(title))
-        Espresso.onView(withId(R.id.reminderDescription)).perform(ViewActions.replaceText(desc))
+            // fill in new reminder fields
+            val title = "Title 345"
+            val desc = "Desc 345"
+            onView(withId(R.id.reminderTitle)).perform(ViewActions.replaceText(title))
+            onView(withId(R.id.reminderDescription)).perform(ViewActions.replaceText(desc))
 
-        // click on select location
-        Espresso.onView(withId(R.id.selectLocation)).perform(ViewActions.click())
-        // click on map
-        Espresso.onView(withId(R.id.mapView)).perform(ViewActions.click())
+            // click on select location
+            onView(withId(R.id.selectLocation)).perform(ViewActions.click())
+            // click on map
+            onView(withId(R.id.mapView)).perform(ViewActions.click())
 
-        // wait for Save button to become visible and click
-        runBlocking {
-            delay(1000)
-        }
-        Espresso.onView(withId(R.id.button_save)).perform(ViewActions.click())
+            // wait for Save location button to become visible and click
+            runBlocking {
+                delay(1000)
+            }
+            onView(withId(R.id.button_save)).perform(ViewActions.click())
 
-        // validate new reminder
-        //val selectedLocation = saveReminderViewModel.reminderSelectedLocationStr.value
-        val selectedLocation = saveReminderViewModel.selectedPOI.value?.name
+            // validate new reminder
+            val selectedLocation = saveReminderViewModel.selectedPOI.value?.name
+            onView(withText(title)).check(matches(isDisplayed()))
+            onView(withText(desc)).check(matches(isDisplayed()))
+            onView(withText(selectedLocation)).check(matches(isDisplayed()))
 
-        Espresso.onView(ViewMatchers.withText(title)).check(matches(isDisplayed()))
-        Espresso.onView(ViewMatchers.withText(desc)).check(matches(isDisplayed()))
-        Espresso.onView(ViewMatchers.withText(selectedLocation)).check(matches(isDisplayed()))
+            // click on save reminder
+            onView(withId(R.id.saveReminder)).perform(ViewActions.click())
+
+            // toast is shown
+            onView(withText(R.string.reminder_saved)).inRoot(
+                withDecorView(not(decorView))
+            ).check(matches(isDisplayed()))
 
         activityScenario.close()
     }
