@@ -47,15 +47,16 @@ class SaveReminderFragment : BaseFragment() {
     private lateinit var binding: FragmentSaveReminderBinding
 
     private lateinit var geofencingClient: GeofencingClient
-    private val geofencePendingIntent: PendingIntent by lazy {
+    /*private val geofencePendingIntent: PendingIntent by lazy {
         val intent =
             Intent(requireContext(), GeofenceBroadcastReceiver::class.java)
         intent.action = ACTION_GEOFENCE_EVENT
         PendingIntent.getBroadcast(
-            requireActivity(), 0, intent,
+            requireContext(), 0, intent,
             PendingIntent.FLAG_UPDATE_CURRENT
         )
-    }
+    }*/
+    private lateinit var geofencePendingIntent: PendingIntent
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -69,6 +70,14 @@ class SaveReminderFragment : BaseFragment() {
         binding.viewModel = _viewModel
 
         geofencingClient = LocationServices.getGeofencingClient(requireActivity())
+
+        val intent =
+            Intent(requireContext(), GeofenceBroadcastReceiver::class.java)
+        intent.action = ACTION_GEOFENCE_EVENT
+        geofencePendingIntent = PendingIntent.getBroadcast(
+            requireContext(), 0, intent,
+            PendingIntent.FLAG_UPDATE_CURRENT
+        )
 
         return binding.root
     }
@@ -155,7 +164,7 @@ class SaveReminderFragment : BaseFragment() {
 
             geofencingClient.addGeofences(geofencingRequest, geofencePendingIntent)?.run {
                 addOnSuccessListener {
-                    Log.e("Add Geofence", reminder.id)
+                    Log.i("Add Geofence", reminder.id)
                     _viewModel.validateAndSaveReminder(reminder)
                     _viewModel.onGeofenceAdded()
                 }

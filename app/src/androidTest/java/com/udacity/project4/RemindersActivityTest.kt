@@ -110,11 +110,6 @@ class RemindersActivityTest :
     fun addReminder() = runBlocking {
         val activityScenario = ActivityScenario.launch(RemindersActivity::class.java)
 
-
-        //activityScenario.onActivity {   activity ->
-
-
-
             dataBindingIdlingResource.monitorActivity(activityScenario)
 
             // no data at start
@@ -134,7 +129,7 @@ class RemindersActivityTest :
             // click on map
             onView(withId(R.id.mapView)).perform(ViewActions.click())
 
-            // wait for Save button to become visible and click
+            // wait for Save location button to become visible and click
             runBlocking {
                 delay(1000)
             }
@@ -146,16 +141,13 @@ class RemindersActivityTest :
             onView(withText(desc)).check(matches(isDisplayed()))
             onView(withText(selectedLocation)).check(matches(isDisplayed()))
 
+            // click on save reminder
+            onView(withId(R.id.saveReminder)).perform(ViewActions.click())
+
             // toast is shown
             onView(withText(R.string.reminder_saved)).inRoot(
                 withDecorView(not(decorView))
             ).check(matches(isDisplayed()))
-
-            // snack is shown
-            onView(withId(com.google.android.material.R.id.snackbar_text))
-                .check(matches(withText(R.string.geofences_added)))
-
-        //}
 
         activityScenario.close()
     }

@@ -78,10 +78,10 @@ class SaveReminderViewModel(val app: Application, private val dataSource: Remind
     }
 
     fun onGeofenceAdded() {
-        showSnackBarInt.value = R.string.geofences_added
+        showToast.value = app.getString(R.string.geofences_added)
     }
 
     fun onGeofenceAddedError() {
-        showSnackBarInt.value = R.string.error_adding_geofence
+        showToast.value = app.getString(R.string.error_adding_geofence)
     }
 }
