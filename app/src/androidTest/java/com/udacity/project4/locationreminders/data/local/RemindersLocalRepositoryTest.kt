@@ -69,6 +69,14 @@ class RemindersLocalRepositoryTest {
     }
 
     @Test
+    fun insertAndSelectByIdDoesNotExist() = runBlocking  {
+        val result: Result.Error =
+            repository.getReminder("does_not_exist") as Result.Error
+
+        Assert.assertEquals("Reminder not found!", result.message)
+    }
+
+    @Test
     fun insertTwoAndDeleteAll() = runBlocking  {
         repository.saveReminder(generateReminderDTO())
         repository.saveReminder(generateReminderDTO())
