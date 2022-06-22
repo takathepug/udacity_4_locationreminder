@@ -126,6 +126,7 @@ class RemindersActivityTest :
 
             // click on select location
             onView(withId(R.id.selectLocation)).perform(ViewActions.click())
+
             // click on map
             onView(withId(R.id.mapView)).perform(ViewActions.click())
 

@@ -34,13 +34,14 @@ import org.koin.android.ext.android.inject
 class SaveReminderFragment : BaseFragment() {
     private val TAG: String = javaClass.simpleName
 
-    private val GEOFENCE_RADIUS_IN_METERS: Float = 100f
-    private val ACTION_GEOFENCE_EVENT = "RemindersActivity.geofence.event"
-    private val REQUEST_FOREGROUND_AND_BACKGROUND_PERMISSION_RESULT_CODE = 33
-    private val REQUEST_FOREGROUND_ONLY_PERMISSIONS_REQUEST_CODE = 34
-    private val REQUEST_TURN_DEVICE_LOCATION_ON = 29
-
-    private val ANDROID_Q_OR_HIGHER = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
+    companion object {
+        private val GEOFENCE_RADIUS_IN_METERS: Float = 100f
+        val ACTION_GEOFENCE_EVENT = "RemindersActivity.geofence.event"
+        private val REQUEST_FOREGROUND_AND_BACKGROUND_PERMISSION_RESULT_CODE = 33
+        private val REQUEST_FOREGROUND_ONLY_PERMISSIONS_REQUEST_CODE = 34
+        private val REQUEST_TURN_DEVICE_LOCATION_ON = 29
+        private val ANDROID_Q_OR_HIGHER = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
+    }
 
     //Get the view model this time as a single to be shared with the another fragment
     override val _viewModel: SaveReminderViewModel by inject()
@@ -218,7 +219,7 @@ class SaveReminderFragment : BaseFragment() {
     @RequiresApi(Build.VERSION_CODES.Q)
     private fun requestForegroundAndBackgroundLocationPermissions() {
         if (foregroundAndBackgroundLocationPermissionApproved()) {
-            Log.d(TAG, "Required location permissions grented")
+            Log.d(TAG, "Required location permissions granted")
             return
         } else {
             var permissionsArray = arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
