@@ -44,4 +44,5 @@
     <string name="error_adding_geofence">Error Happened, Can\'t Add Geofence</string>
     <string name="error_log_in">Sign in unsuccessful</string>
     <string name="error_location_permission_not_added">Location permission required</string>
+    <string name="error_latlon">Invalid latitude and/or longitude</string>
 </resources>

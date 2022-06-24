@@ -178,7 +178,9 @@ class SaveReminderFragment : BaseFragment() {
 
             }
         } else {
+            // error in latitude and/or longitude
             Log.e(TAG, "Location is not valid")
+            _viewModel.onLatLonError()
         }
 
     }
