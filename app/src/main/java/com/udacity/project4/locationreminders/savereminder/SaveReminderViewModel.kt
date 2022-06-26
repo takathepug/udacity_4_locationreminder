@@ -1,6 +1,7 @@
 package com.udacity.project4.locationreminders.savereminder
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.maps.model.PointOfInterest
@@ -14,6 +15,8 @@ import kotlinx.coroutines.launch
 
 class SaveReminderViewModel(val app: Application, private val dataSource: ReminderDataSource) :
     BaseViewModel(app) {
+    private val TAG: String = javaClass.simpleName
+
     val reminderTitle = MutableLiveData<String>()
     val reminderDescription = MutableLiveData<String>()
     val selectedPOI = MutableLiveData<PointOfInterest>()
@@ -52,6 +55,7 @@ class SaveReminderViewModel(val app: Application, private val dataSource: Remind
             showSnackBarInt.value = R.string.err_select_location
             return false
         }
+
         return true
     }
 
@@ -59,6 +63,8 @@ class SaveReminderViewModel(val app: Application, private val dataSource: Remind
      * Save the reminder to the data source
      */
     fun saveReminder(reminderData: ReminderDataItem) {
+        Log.d(TAG, "Saving reminder: $reminderData")
+
         showLoading.value = true
         viewModelScope.launch {
             dataSource.saveReminder(
@@ -77,15 +83,21 @@ class SaveReminderViewModel(val app: Application, private val dataSource: Remind
         }
     }
 
-    fun onGeofenceAdded() {
+    fun onGeofenceAdded(reminderData: ReminderDataItem) {
         showSnackBarInt.value = R.string.geofences_added
+
+        saveReminder(reminderData)
     }
 
-    fun onGeofenceAddedError() {
-        showSnackBarInt.value = R.string.error_adding_geofence
+    fun onGeofenceAddError() {
+        showSnackBarInt.value = R.string.geofences_not_added
     }
 
     fun onLatLonError() {
         showSnackBarInt.value = R.string.error_latlon
+    }
+
+    fun onInvalidLocationPermissions() {
+        showSnackBarInt.value = R.string.error_location_permission_not_added
     }
 }
