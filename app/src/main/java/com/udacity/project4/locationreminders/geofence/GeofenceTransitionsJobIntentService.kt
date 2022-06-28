@@ -21,7 +21,6 @@ import kotlin.coroutines.CoroutineContext
 class GeofenceTransitionsJobIntentService : JobIntentService(), CoroutineScope {
     private val TAG: String = javaClass.simpleName
 
-    private val remindersLocalRepository: ReminderDataSource by inject()
     private var coroutineJob: Job = Job()
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.IO + coroutineJob
@@ -87,6 +86,7 @@ class GeofenceTransitionsJobIntentService : JobIntentService(), CoroutineScope {
             CoroutineScope(coroutineContext).launch(SupervisorJob()) {
                 //get the reminder with the request id
                 val result = remindersLocalRepository.getReminder(requestId)
+
                 if (result is Result.Success<ReminderDTO>) {
                     val reminderDTO = result.data
                     // send a notification to the user with the reminder details
