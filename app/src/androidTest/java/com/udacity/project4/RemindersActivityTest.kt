@@ -126,6 +126,7 @@ class RemindersActivityTest :
 
             // click on select location
             onView(withId(R.id.selectLocation)).perform(ViewActions.click())
+
             // click on map
             onView(withId(R.id.mapView)).perform(ViewActions.click())
 
@@ -148,6 +149,10 @@ class RemindersActivityTest :
             onView(withText(R.string.reminder_saved)).inRoot(
                 withDecorView(not(decorView))
             ).check(matches(isDisplayed()))
+
+            // snackbar is shown
+            onView(withId(com.google.android.material.R.id.snackbar_text))
+                .check(matches(withText(R.string.geofences_added)))
 
         activityScenario.close()
     }
