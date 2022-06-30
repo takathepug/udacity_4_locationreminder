@@ -150,6 +150,10 @@ class RemindersActivityTest :
                 withDecorView(not(decorView))
             ).check(matches(isDisplayed()))
 
+            // snackbar is shown
+            onView(withId(com.google.android.material.R.id.snackbar_text))
+                .check(matches(withText(R.string.geofences_added)))
+
         activityScenario.close()
     }
 }
