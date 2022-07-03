@@ -6,8 +6,10 @@ import android.annotation.TargetApi
 import android.app.PendingIntent
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -19,6 +21,7 @@ import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
 import com.google.android.gms.tasks.Task
 import com.google.android.material.snackbar.Snackbar
+import com.udacity.project4.BuildConfig
 import com.udacity.project4.R
 import com.udacity.project4.base.BaseFragment
 import com.udacity.project4.base.NavigationCommand
@@ -38,6 +41,10 @@ class SaveReminderFragment : BaseFragment() {
         private val REQUEST_FOREGROUND_AND_BACKGROUND_PERMISSION_RESULT_CODE = 33
         private val REQUEST_FOREGROUND_ONLY_PERMISSIONS_REQUEST_CODE = 34
         private val REQUEST_TURN_DEVICE_LOCATION_ON = 29
+
+        private const val LOCATION_PERMISSION_INDEX = 0
+        private const val BACKGROUND_LOCATION_PERMISSION_INDEX = 1
+
         private val ANDROID_Q_OR_HIGHER = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
     }
 
@@ -86,33 +93,7 @@ class SaveReminderFragment : BaseFragment() {
         }
 
         binding.saveReminder.setOnClickListener {
-            val title = _viewModel.reminderTitle.value
-            val description = _viewModel.reminderDescription.value
-            val selectedPoi = _viewModel.selectedPOI.value
-            val location = selectedPoi?.name
-            val latitude = selectedPoi?.latLng?.latitude
-            val longitude = selectedPoi?.latLng?.longitude
-
-            val newReminder = ReminderDataItem(
-                title = title,
-                description = description,
-                latitude = latitude,
-                longitude = longitude,
-                location = location
-            )
-
-            addGeofenceAndSaveReminder(newReminder)
-
-            //  check if both the required permissions (foreground and background) have been granted
-            //ensureForegroundAndBackgroundLocationPermissions()
-
-            // use the user entered reminder details to:
-            // 1) add a geofencing request
-            // 2) save the reminder to the local db
-            /*if (_viewModel.validateEnteredData(newReminder))
-                addGeofenceAndSaveReminder(newReminder)
-            else
-                Log.i(TAG, "Reminder data contains errors: $newReminder")*/
+            addGeofenceAndSaveReminder()
         }
     }
 
@@ -122,8 +103,28 @@ class SaveReminderFragment : BaseFragment() {
         _viewModel.onClear()
     }
 
+    private fun buildReminderData(): ReminderDataItem {
+        // gets reminder data from ViewModel and selected POI
+        val title = _viewModel.reminderTitle.value
+        val description = _viewModel.reminderDescription.value
+        val selectedPoi = _viewModel.selectedPOI.value
+        val location = selectedPoi?.name
+        val latitude = selectedPoi?.latLng?.latitude
+        val longitude = selectedPoi?.latLng?.longitude
+
+        return ReminderDataItem(
+            title = title,
+            description = description,
+            latitude = latitude,
+            longitude = longitude,
+            location = location
+        )
+    }
+
     @TargetApi(29)
-    private fun addGeofenceAndSaveReminder(newReminder: ReminderDataItem) {
+    private fun addGeofenceAndSaveReminder() {
+        val newReminder = buildReminderData()
+
         // Check if reminder has all data
         if(!_viewModel.validateEnteredData(newReminder))
             return
@@ -147,8 +148,6 @@ class SaveReminderFragment : BaseFragment() {
             return
         }
     }
-
-
 
     private fun buildGeoFence(reminder: ReminderDataItem): Geofence {
         // build geofence around reminder location
@@ -259,7 +258,6 @@ class SaveReminderFragment : BaseFragment() {
     }
 
     private fun ensureLocationServiceAddGeofenceAndSaveReminder(newReminder: ReminderDataItem) {
-
         val locationSettingsRequest: LocationSettingsRequest =
             LocationSettingsRequest.Builder().addLocationRequest(LocationRequest.create().apply {
                 priority = LocationRequest.PRIORITY_LOW_POWER
@@ -296,6 +294,47 @@ class SaveReminderFragment : BaseFragment() {
                     ensureLocationServiceAddGeofenceAndSaveReminder(newReminder)
                 }.show()
             }
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
+        if (
+            grantResults.isEmpty() ||
+            grantResults[LOCATION_PERMISSION_INDEX] == PackageManager.PERMISSION_DENIED ||
+            (requestCode == REQUEST_FOREGROUND_AND_BACKGROUND_PERMISSION_RESULT_CODE &&
+                    grantResults[BACKGROUND_LOCATION_PERMISSION_INDEX] ==
+                    PackageManager.PERMISSION_DENIED)
+        ) {
+            val explanationResId = R.string.location_required_error
+
+            Snackbar.make(
+                requireActivity().findViewById(android.R.id.content),
+                explanationResId,
+                Snackbar.LENGTH_INDEFINITE
+            )
+                .setAction(R.string.settings) {
+                    startActivity(Intent().apply {
+                        action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+                        data = Uri.fromParts("package", BuildConfig.APPLICATION_ID, null)
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    })
+                }.show()
+        } else {
+            ensureLocationServiceAddGeofenceAndSaveReminder(buildReminderData())
+        }
+    }
+
+    // https://github.com/udacity/android-kotlin-geo-fences/blob/master/app/src/main/java/com/example/android/treasureHunt/HuntMainActivity.kt
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == REQUEST_TURN_DEVICE_LOCATION_ON) {
+            // We don't rely on the result code, but just check the location setting again
+            addGeofenceAndSaveReminder()
         }
     }
 
