@@ -3,6 +3,7 @@ package com.udacity.project4.locationreminders
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import com.udacity.project4.R
@@ -39,5 +40,13 @@ class ReminderDescriptionActivity : AppCompatActivity() {
             intent.extras?.getSerializable(EXTRA_ReminderDataItem) as ReminderDataItem
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true);
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
+        android.R.id.home -> {
+            finish()
+            true
+        }
+        else -> super.onOptionsItemSelected(item)
     }
 }
